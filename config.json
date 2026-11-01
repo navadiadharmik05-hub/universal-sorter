@@ -1,0 +1,47 @@
+{
+  "configVersion": "1.1",
+  "watchedFolders": [
+    {
+      "path": "D:\\Dharmik ECS-1\\DSD_EXP\\MDM\\EDC_EXPS",
+      "autoWatch": true,
+      "includeSubfolders": false
+    }
+  ],
+  "ollamaUrl": "http://localhost:11434/api/chat",
+  "ollamaModel": "qwen3.5:4b",
+  "aiBackend": "ollama",
+  "aiBaseUrl": "http://localhost:11434/api/chat",
+  "aiApiKey": "",
+  "allowLocalNetwork": false,
+  "disableAi": false,
+  "promptSize": "normal",
+  "aiContextSize": 8192,
+  "aiTimeoutSeconds": 120,
+  "keepAlive": "30m",
+  "concurrency": 1,
+  "visionMode": "uninformative",
+  "categories": [
+    "Academics",
+    "Finance_Invoices",
+    "Code_Projects",
+    "Installers",
+    "Images",
+    "Videos",
+    "Docs",
+    "Needs_Review",
+    "Misc",
+    "Audio",
+    "Archives",
+    "Spreadsheets",
+    "Presentations",
+    "Ebooks",
+    "Design",
+    "Fonts",
+    "Data"
+  ],
+  "userRules": [],
+  "confidenceThreshold": 1.0,
+  "reviewMode": false,
+  "scanExistingFiles": false,
+  "stabilityIntervalMs": 3000
+}
