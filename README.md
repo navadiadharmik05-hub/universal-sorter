@@ -1,43 +1,117 @@
-# Universal File Sorter
+# 🗂️ Universal File Sorter
 
-An advanced, data-driven, local AI-powered Java 17 + Swing application that automatically sorts and organizes files in watched directories with zero data loss, robust safety guarantees, and a custom retro-themed UI.
+**Your Downloads folder, finally tamed.** An AI-powered Java desktop app that watches your Downloads folder and instantly sorts every new file into the right place—completely offline, completely private, and with zero user intervention.
 
-## Features
+> Built for the **Hacktoberfest 2026 "Slow and Steady"** challenge.
 
-- **Part A: Redesigned Review Queue & UI**
-  - Custom Java Swing Retro UI with FlatLaf integration (`AppTheme`, `RetroButton`, `RetroCard`, custom pumpkin graphics).
-  - Review Queue with confidence progress bars, summary/reasons, collapsible details panel, empty state with pumpkin graphic, custom change category dialog with user rule creation, tab badge, tooltips, right-click context menu, and keyboard shortcuts (`Enter` to approve, `Delete` to skip, double-click to change category).
-- **Part B: Content-Based Extraction & Structured AI**
-  - Privacy-conscious `FileContext` record capturing metadata, MIME types, and text previews.
-  - Multi-format extraction using Apache PDFBox (PDFs), Apache POI / ZIP-XML (Office, OpenDoc, ZIP), and robust text line reading.
-  - Local Ollama structured JSON classification enforcing schema constraints, confidence thresholds, reasoning, and summary generation.
-- **Part C: Universal Coverage & Robust Safety**
-  - Comprehensive data-driven rule engine covering hundreds of file types (Images, Videos, Audio, Spreadsheets, Presentations, Ebooks, Archives, Installers, Design/CAD/3D, Fonts, Data/Configs, Code, Logs, Certificates, Torrents).
-  - Atomic JSON persistence (`AtomicJsonWriter`), file stability checks, category sanitization, and multi-level undo history.
+---
 
-## Offline Use & Local AI Tuning
+## ✨ Features
 
-Universal File Sorter is built from the ground up for **100% offline, private operation**:
-- **Strict Network Security (`NetworkGuard`)**: Enforces loopback connections (`localhost`, `127.0.0.1`, `::1`, `127.*`) by default, blocking any external requests unless explicit local network permission is enabled. Zero telemetry or external asset loading.
-- **Optimized for Local Models (`qwen3.5:4b`)**: Configured via Ollama (`/api/chat`) with explicit parameter tuning:
-  - `think: false` (with automatic fallback handling for models supporting reasoning tokens)
-  - Configurable context window (`num_ctx`: 4096 / 8192 / 16384)
-  - Keep-alive persistence (`keep_alive`: `"30m"`)
-  - Strict JSON schema enforcement and robust JSON repair (`JsonRepair`) handling unclosed reasoning blocks and markdown fences.
-- **Graceful Degradation**: When Ollama or external AI backends are offline or disabled, the application seamlessly falls back to rule-based sorting (`RuleEngine` & `UserRuleEngine`) and routes low-confidence files to the Review Queue.
+- **Set it and forget it** — runs silently in the background, sorting files the moment they land in your Downloads folder.
+- **AI-powered classification** — uses a local Llama 3.2 model to read file content and pick a category (e.g., `Academics`, `Finance_Invoices`, `Code_Projects`).
+- **100% offline & private** — everything runs on your machine. No API keys, no cloud calls, no data leaves your PC.
+- **Content-aware** — extracts text from PDFs, reads the first lines of code files, and uses filenames for media/binaries to make smart decisions.
+- **Retro-themed GUI** — a custom Java Swing interface to view sorting history, review low-confidence decisions, and undo moves.
+- **Rule engine fallback** — when the AI model is unavailable, a built-in rule engine keeps sorting files by extension.
 
-## Building and Running
+---
+
+## 🛠️ Tech Stack
+
+| Layer          | Technology                                          |
+| -------------- | --------------------------------------------------- |
+| Language       | Java 17                                             |
+| Build Tool     | Maven                                               |
+| GUI            | Java Swing (custom retro theme)                     |
+| AI Model       | Llama 3.2 (3B) via [Ollama](https://ollama.com/)    |
+| PDF Extraction | Apache PDFBox 2.0.30                                |
+| JSON Parsing   | Gson 2.10.1                                         |
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+1. **Java 17+**  
+   Verify with: `java -version`
+
+2. **Maven**  
+   Verify with: `mvn -version`
+
+3. **Ollama** (for AI-powered sorting)  
+   - Install from [ollama.com](https://ollama.com/)
+   - Pull the Llama 3.2 model:
+     ```bash
+     ollama pull llama3.2
+     ```
+   - Make sure Ollama is running before you start the app:
+     ```bash
+     ollama serve
+     ```
+
+> **💡 Hardware note:** The 3B-parameter model is optimized to run smoothly on mid-range GPUs like a GTX 1660 (6 GB VRAM). It works on CPU too, just slower.
+
+---
+
+## 🚀 Getting Started
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/navadiadharmik05-hub/universal-sorter.git
+cd universal-sorter
+
+# 2. Compile the project
 mvn clean compile
-mvn test
+
+# 3. Run the application
 mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-To pre-download dependencies for offline building:
-```bash
-mvn dependency:go-offline
+The GUI will launch and immediately begin watching your Downloads folder. New files are sorted automatically—no extra setup needed.
+
+---
+
+## ⚙️ How It Works
+
+```
+Downloads folder
+       │
+       ▼
+  ┌──────────────────┐
+  │   WatchService    │  ← Background thread detects new files
+  └────────┬─────────┘
+           │
+           ▼
+  ┌──────────────────┐
+  │    Extractor      │  ← Reads a snippet: first PDF page,
+  │                   │     first 20 lines of code, or filename
+  └────────┬─────────┘
+           │
+           ▼
+  ┌──────────────────┐
+  │   Llama 3.2 (AI) │  ← Local model classifies the file
+  │   via Ollama      │     into a category (e.g., "Academics")
+  └────────┬─────────┘
+           │
+           ▼
+  ┌──────────────────┐
+  │    File Mover     │  ← Moves the file into the right folder
+  └──────────────────┘
 ```
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-Co-Authored-By: Claude Code <noreply@anthropic.com>
+1. **Watch** — A background thread uses Java's `WatchService` to monitor the Windows Downloads folder for new files.
+2. **Extract** — It reads a small snippet of the file. For PDFs, it grabs the first page of text. For code files, the first 20 lines. For images, videos, or installers, it uses just the filename.
+3. **Classify** — The snippet is sent to the local Llama 3.2 model with a strict prompt that returns exactly one category.
+4. **Sort** — The file is instantly moved into the corresponding folder inside Downloads.
+
+---
+
+## 📄 License
+
+This project is open source. See the repository for license details.
+
+---
+
+<p align="center">Made with ☕ and local AI by <a href="https://github.com/navadiadharmik05-hub">@navadiadharmik05-hub</a></p>
